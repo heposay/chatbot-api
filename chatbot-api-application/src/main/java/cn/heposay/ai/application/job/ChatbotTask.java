@@ -6,12 +6,7 @@ import cn.heposay.ai.domain.zsxq.domain.vo.Topics;
 import cn.heposay.ai.domain.zsxq.service.IZsxqApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -20,40 +15,43 @@ import java.util.Random;
 
 /**
  * @author heposay
- * @description 定时轮询问题并利用Chatgpt回答问题
+ * @description 任务体
  * @github <a href="http://github.com/heposay"> heposay的Github仓库 </a>
- * @time Created in 2023/4/25 17:10
+ * @time Created in 2023/4/25 20:44
  */
-@EnableScheduling
-@Configuration
-public class ChatGPTSchedule {
-    private final Logger logger = LoggerFactory.getLogger(ChatGPTSchedule.class);
+public class ChatbotTask implements Runnable{
 
-    @Value("${chatbot-api.groupId}")
+    private Logger logger = LoggerFactory.getLogger(ChatbotTask.class);
+
+    private String groupName;
     private String groupId;
-
-    @Value("${chatbot-api.cookie}")
     private String cookie;
+    private String openAiKey;
 
-    @Resource
     private IZsxqApi zsxqApi;
-
-    @Resource
     private IOpenApi openApi;
 
+    public ChatbotTask(String groupName, String groupId, String cookie, String openAiKey, IZsxqApi zsxqApi, IOpenApi openApi) {
+        this.groupName = groupName;
+        this.groupId = groupId;
+        this.cookie = cookie;
+        this.openAiKey = openAiKey;
+        this.zsxqApi = zsxqApi;
+        this.openApi = openApi;
+    }
 
-    @Scheduled(cron = "0/5 * * * * ?")
+    @Override
     public void run() {
         try {
             if (new Random().nextBoolean()) {
-                logger.info("随机打烊中。。。。");
+                logger.info("{} 随机打烊中。。。。", groupName);
                 return;
             }
 
             GregorianCalendar calendar = new GregorianCalendar();
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
             if (hour > 22 || hour < 7) {
-                logger.info("现在是打烊时间不工作，AI 下班了！");
+                logger.info("{} 现在是打烊时间不工作，AI 下班了！", groupName);
                 return;
             }
 
@@ -61,19 +59,19 @@ public class ChatGPTSchedule {
             UnAnsweredQuestionsAggregates unAnsweredQuestionsAggregates = zsxqApi.queryUnAnsweredQuestionsTopicId(groupId, cookie);
             List<Topics> topics = unAnsweredQuestionsAggregates.getResp_data().getTopics();
             if (null == topics || topics.isEmpty()) {
-                logger.info("本次未检索到待会答问题");
+                logger.info("{} 本次未检索到待会答问题", groupName);
                 return;
             }
 
             //2.AI 回答
             Topics topic = topics.get(0);
-            String answer = openApi.doChatGPT(topic.getQuestion().getText());
+            String answer = openApi.doChatGPT(openAiKey, topic.getQuestion().getText());
 
             //3.回答问题
             boolean status = zsxqApi.answer(groupId, cookie, topic.getTopic_id(), answer, false);
-            logger.info("编号:{}, 问题:{}, 回答:{}, 状态:{}", topic.getTopic_id(), topic.getQuestion().getText(), answer, status);
+            logger.info("{} 编号:{}, 问题:{}, 回答:{}, 状态:{}", groupName, topic.getTopic_id(), topic.getQuestion().getText(), answer, status);
         } catch (IOException e) {
-           logger.error("自动回答问题异常", e);
+            logger.error("{} 自动回答问题异常", groupName, e);
         }
     }
 }

@@ -83,5 +83,10 @@
             <artifactId>chatbot-api-domain</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>cn.heposay.ai</groupId>
+            <artifactId>chatbot-api-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>

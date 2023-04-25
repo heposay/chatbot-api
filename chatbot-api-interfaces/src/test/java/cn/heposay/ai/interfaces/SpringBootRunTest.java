@@ -58,7 +58,7 @@ public class SpringBootRunTest {
 
     @Test
     public void test_chatgpt() throws IOException {
-        String jsonStr = openApi.doChatGPT("帮我写一个冒泡排序");
+        String jsonStr = openApi.doChatGPT("openAiKey", "帮我写一个冒泡排序");
         logger.info("测试结果：{}", jsonStr);
 
     }

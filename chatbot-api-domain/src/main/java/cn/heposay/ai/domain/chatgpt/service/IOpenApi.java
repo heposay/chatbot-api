@@ -14,9 +14,10 @@ public interface IOpenApi {
     /**
      * 调用 Chatgpt 接口
      *
+     * @param openAiKey 自行申请 https://beta.openai.com/overview
      * @param question 问题信息
      * @return json数据
      * @throws IOException HTTP远程调用过程中如果出现异常，打印异常日志
      */
-    String doChatGPT(String question) throws IOException;
+    String doChatGPT(String openAiKey, String question) throws IOException;
 }

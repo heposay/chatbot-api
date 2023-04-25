@@ -27,12 +27,9 @@ import java.util.List;
 @Service
 public class OpenApi implements IOpenApi {
 
-    @Value("${chatbot-api.openAiKey}")
-    private String openAiKey;
-
 
     @Override
-    public String doChatGPT(String question) throws IOException {
+    public String doChatGPT(String openAiKey, String question) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
         HttpPost post = new HttpPost("https://api.openai.com/v1/completions");
