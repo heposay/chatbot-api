@@ -1,9 +1,5 @@
-package cn.heposay.ai.test;
+package cn.heposay.ai.interfaces;
 
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -13,7 +9,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.junit.Test;import org.openqa.selenium.remote.http.HttpClient;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -27,7 +23,7 @@ public class AppTest{
     @Test
     public void query_zsxq_answers_test() throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-        HttpGet get = new HttpGet("https://api.zsxq.com/v2/groups/88885818111582/topics?scope=all&count=20");
+        HttpGet get = new HttpGet("https://api.zsxq.com/v2/groups/28885518425541/topics?scope=unanswered_questions&count=20");
         get.addHeader("cookie", "UM_distinctid=186a1b7b06611c-03507ddfe121e9-1d525635-1aeaa0-186a1b7b067740; zsxq_access_token=037C20AA-B1A1-CA8D-3BCD-230A2A9B50A9_25AFFA98B3660AC6; sensorsdata2015jssdkcross={\"distinct_id\":\"15158212415442\",\"first_id\":\"18691e9387a3cc-052d94d2fb0371-1d525635-1764000-18691e9387bdf6\",\"props\":{\"$latest_traffic_source_type\":\"引荐流量\",\"$latest_search_keyword\":\"未取到值\",\"$latest_referrer\":\"https://bugstack.cn/\"},\"identities\":\"eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTg2OTFlOTM4N2EzY2MtMDUyZDk0ZDJmYjAzNzEtMWQ1MjU2MzUtMTc2NDAwMC0xODY5MWU5Mzg3YmRmNiIsIiRpZGVudGl0eV9sb2dpbl9pZCI6IjE1MTU4MjEyNDE1NDQyIn0=\",\"history_login_id\":{\"name\":\"$identity_login_id\",\"value\":\"15158212415442\"},\"$device_id\":\"18691e9387a3cc-052d94d2fb0371-1d525635-1764000-18691e9387bdf6\"}; zsxqsessionid=8e56eb544ab2592f20760dcd5b29ecca; abtest_env=product");
         get.addHeader("Content-Type", "application/json;charset=UTF-8");
 
@@ -44,19 +40,19 @@ public class AppTest{
     @Test
     public void answer_question_test() throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-        HttpPost post = new HttpPost("https://api.zsxq.com/v2/topics/814248484454812/comments");
+        HttpPost post = new HttpPost("https://api.zsxq.com/v2/topics/412884248251548/answer");
         post.addHeader("cookie", "UM_distinctid=186a1b7b06611c-03507ddfe121e9-1d525635-1aeaa0-186a1b7b067740; zsxq_access_token=037C20AA-B1A1-CA8D-3BCD-230A2A9B50A9_25AFFA98B3660AC6; sensorsdata2015jssdkcross={\"distinct_id\":\"15158212415442\",\"first_id\":\"18691e9387a3cc-052d94d2fb0371-1d525635-1764000-18691e9387bdf6\",\"props\":{\"$latest_traffic_source_type\":\"引荐流量\",\"$latest_search_keyword\":\"未取到值\",\"$latest_referrer\":\"https://bugstack.cn/\"},\"identities\":\"eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTg2OTFlOTM4N2EzY2MtMDUyZDk0ZDJmYjAzNzEtMWQ1MjU2MzUtMTc2NDAwMC0xODY5MWU5Mzg3YmRmNiIsIiRpZGVudGl0eV9sb2dpbl9pZCI6IjE1MTU4MjEyNDE1NDQyIn0=\",\"history_login_id\":{\"name\":\"$identity_login_id\",\"value\":\"15158212415442\"},\"$device_id\":\"18691e9387a3cc-052d94d2fb0371-1d525635-1764000-18691e9387bdf6\"}; zsxqsessionid=8e56eb544ab2592f20760dcd5b29ecca; abtest_env=product");
         post.addHeader("Content-Type", "application/json;charset=UTF-8");
 
-        String jsonParam = "{\n" +
+        String paramJson = "{\n" +
                 "  \"req_data\": {\n" +
-                "    \"text\": \"你自己去百度\\n\",\n" +
+                "    \"text\": \"自己去百度！\\n\",\n" +
                 "    \"image_ids\": [],\n" +
-                "    \"mentioned_user_ids\": []\n" +
+                "    \"silenced\": false\n" +
                 "  }\n" +
                 "}";
-        StringEntity stringEntity = new StringEntity(jsonParam,
-                ContentType.create("test/json", "UTF-8"));
+        StringEntity stringEntity = new StringEntity(paramJson,
+                ContentType.create("interfaces/json", "UTF-8"));
         post.setEntity(stringEntity);
         CloseableHttpResponse response = httpClient.execute(post);
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {

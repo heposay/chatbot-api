@@ -1,2 +1,5 @@
 server:
   port: 8090
+chatbot-api:
+  groupId: 28885518425541
+  cookie: UM_distinctid=186a1b7b06611c-03507ddfe121e9-1d525635-1aeaa0-186a1b7b067740; zsxq_access_token=037C20AA-B1A1-CA8D-3BCD-230A2A9B50A9_25AFFA98B3660AC6; sensorsdata2015jssdkcross={"distinct_id":"15158212415442","first_id":"18691e9387a3cc-052d94d2fb0371-1d525635-1764000-18691e9387bdf6","props":{"$latest_traffic_source_type":"引荐流量","$latest_search_keyword":"未取到值","$latest_referrer":"https://bugstack.cn/"},"identities":"eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTg2OTFlOTM4N2EzY2MtMDUyZDk0ZDJmYjAzNzEtMWQ1MjU2MzUtMTc2NDAwMC0xODY5MWU5Mzg3YmRmNiIsIiRpZGVudGl0eV9sb2dpbl9pZCI6IjE1MTU4MjEyNDE1NDQyIn0=","history_login_id":{"name":"$identity_login_id","value":"15158212415442"},"$device_id":"18691e9387a3cc-052d94d2fb0371-1d525635-1764000-18691e9387bdf6"}; zsxqsessionid=8e56eb544ab2592f20760dcd5b29ecca; abtest_env=product
