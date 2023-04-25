@@ -16,10 +16,10 @@ import java.io.IOException;
 /**
  * @author heposay
  * @description 知识星球回答问题、获取问题的单元测试
- * @github  http://github.com/heposay/
- * @time  Created in 2023-04-25 13:34:20
+ * @github http://github.com/heposay/
+ * @time Created in 2023-04-25 13:34:20
  */
-public class AppTest{
+public class AppTest {
     @Test
     public void query_zsxq_answers_test() throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
@@ -31,7 +31,7 @@ public class AppTest{
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             String res = EntityUtils.toString(response.getEntity());
             System.out.println(res);
-        }else {
+        } else {
             System.out.println(response.getStatusLine().getStatusCode());
         }
 
@@ -52,15 +52,45 @@ public class AppTest{
                 "  }\n" +
                 "}";
         StringEntity stringEntity = new StringEntity(paramJson,
-                ContentType.create("interfaces/json", "UTF-8"));
+                ContentType.create("text/json", "UTF-8"));
         post.setEntity(stringEntity);
         CloseableHttpResponse response = httpClient.execute(post);
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             String res = EntityUtils.toString(response.getEntity());
             System.out.println(res);
-        }else {
+        } else {
             System.out.println(response.getStatusLine().getStatusCode());
         }
+    }
+
+    @Test
+    public void test_openapi() throws IOException {
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+
+        HttpPost post = new HttpPost("https://api.openai.com/v1/completions");
+        post.addHeader("Authorization", "Bearer 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");
+        post.addHeader("Content-Type", "application/json;charset=UTF-8");
+
+        String paramJson = "{\n" +
+                "        \"model\": \"text-davinci-003\",\n" +
+                "                \"prompt\": \"帮我写一个冒泡排序算法\",\n" +
+                "                \"max_tokens\": 1024,\n" +
+                "                \"temperature\": 0\n" +
+                "    }";
+
+        StringEntity stringEntity = new StringEntity(paramJson,
+                ContentType.create("text/json", "UTF-8"));
+
+        post.setEntity(stringEntity);
+
+        CloseableHttpResponse response = httpClient.execute(post);
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            String res = EntityUtils.toString(response.getEntity());
+            System.out.println(res);
+        } else {
+            System.out.println(response.getStatusLine().getStatusCode());
+        }
+
     }
 
 }

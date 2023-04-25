@@ -1,5 +1,6 @@
 package cn.heposay.ai.interfaces;
 
+import cn.heposay.ai.domain.chatgpt.service.IOpenApi;
 import cn.heposay.ai.domain.zsxq.domain.aggregates.UnAnsweredQuestionsAggregates;
 import cn.heposay.ai.domain.zsxq.domain.vo.Topics;
 import cn.heposay.ai.domain.zsxq.service.IZsxqApi;
@@ -37,6 +38,9 @@ public class SpringBootRunTest {
     @Resource
     private IZsxqApi zsxqApi;
 
+    @Resource
+    private IOpenApi openApi;
+
     @Test
     public void test_zsxqApi() throws IOException {
         UnAnsweredQuestionsAggregates unAnsweredQuestionsAggregates = zsxqApi.queryUnAnsweredQuestionsTopicId(groupId, cookie);
@@ -50,5 +54,12 @@ public class SpringBootRunTest {
             //回答问题, 这个text后期就是Chatgpt回复的内容
             zsxqApi.answer(groupId, cookie, topicId, text, false);
         }
+    }
+
+    @Test
+    public void test_chatgpt() throws IOException {
+        String jsonStr = openApi.doChatGPT("帮我写一个冒泡排序");
+        logger.info("测试结果：{}", jsonStr);
+
     }
 }
