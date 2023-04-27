@@ -1,65 +1,81 @@
 package cn.heposay.ai.interfaces;
 
+import cn.heposay.ai.common.config.ModelConstant;
+import cn.heposay.ai.common.config.OpenAiConfig;
+import cn.heposay.ai.common.config.ZsxqConfig;
+import cn.heposay.ai.common.exception.BusinessException;
+import cn.heposay.ai.common.utils.SpringContextUtils;
+import cn.heposay.ai.domain.chatgpt.domain.req.CreateCompletionRequest;
+import cn.heposay.ai.domain.chatgpt.domain.res.CreateCompletionResponse;
 import cn.heposay.ai.domain.chatgpt.service.IOpenApi;
-import cn.heposay.ai.domain.zsxq.domain.aggregates.UnAnsweredQuestionsAggregates;
-import cn.heposay.ai.domain.zsxq.domain.vo.Topics;
+import cn.heposay.ai.domain.zsxq.domain.req.AnswerRequest;
+import cn.heposay.ai.domain.zsxq.domain.req.ListTopicsRequest;
+import cn.heposay.ai.domain.zsxq.domain.req.ReqData;
+import cn.heposay.ai.domain.zsxq.domain.res.AnswerResponse;
+import cn.heposay.ai.domain.zsxq.domain.res.ListTopicsResponse;
 import cn.heposay.ai.domain.zsxq.service.IZsxqApi;
-import com.alibaba.fastjson.JSON;
+import cn.hutool.core.collection.CollectionUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
-import java.io.IOException;
-import java.util.List;
+import javax.swing.*;
 
 /**
  * @author heposay
- * @description 知识星球 API 接口测试类
+ * @description  API 接口测试类
  * @github <a href="http://github.com/heposay"> heposay的Github仓库 </a>
  * @time Created in 2023/4/25 15:31
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@Slf4j
 public class SpringBootRunTest {
-
-    private Logger logger = LoggerFactory.getLogger(SpringBootRunTest.class);
-
-    @Value("${chatbot-api.groupId}")
-    private String groupId;
-
-    @Value("${chatbot-api.cookie}")
-    private String cookie;
-
     @Resource
     private IZsxqApi zsxqApi;
 
     @Resource
     private IOpenApi openApi;
 
-    @Test
-    public void test_zsxqApi() throws IOException {
-        UnAnsweredQuestionsAggregates unAnsweredQuestionsAggregates = zsxqApi.queryUnAnsweredQuestionsTopicId(groupId, cookie);
-        logger.info("测试结果:{}", JSON.toJSONString(unAnsweredQuestionsAggregates));
-        List<Topics> topics = unAnsweredQuestionsAggregates.getResp_data().getTopics();
-        for (Topics topic : topics) {
-            String topicId = topic.getTopic_id();
-            String text = topic.getQuestion().getText();
-            logger.info("主题的topicId:{}, 回答内容:{}", topicId, text);
+    private static final String OPENAI_API_KEY = "你的 OPENAI_API_KEY";
 
-            //回答问题, 这个text后期就是Chatgpt回复的内容
-            zsxqApi.answer(groupId, cookie, topicId, text, false);
-        }
+    private static final String COOKIE = "你的 COOKIE";
+
+    @Test
+    public void test_list_topics() {
+        ListTopicsRequest request = new ListTopicsRequest();
+        request.setGroupId("28885518425541");
+        request.setScope("all");
+        request.setCount(20);
+        ListTopicsResponse response = zsxqApi.queryUnAnsweredQuestionsTopicId(request, COOKIE);
+        Assertions.assertNotNull(response);
     }
 
     @Test
-    public void test_chatgpt() throws IOException {
-        String jsonStr = openApi.doChatGPT("openAiKey", "帮我写一个冒泡排序");
-        logger.info("测试结果：{}", jsonStr);
+    public void test_answer() {
+        AnswerRequest answerRequest = new AnswerRequest();
+        answerRequest.setTopicId("问题id");
+        ReqData reqData = new ReqData();
+        reqData.setText("我的回答");
+        reqData.setSilenced(true);
+        reqData.setImage_ids(CollectionUtil.newArrayList());
+        answerRequest.setReq_data(reqData);
+        AnswerResponse response = zsxqApi.answer(answerRequest, COOKIE);
+        Assertions.assertNotNull(response);
+    }
 
+    @Test
+    public void test_chatgpt() throws BusinessException {
+        CreateCompletionRequest request = new CreateCompletionRequest();
+        request.setPrompt("帮我写一个堆排序算法，用Java代码实现");
+        request.setModel(ModelConstant.TEXT_DAVINCI_003);
+        request.setMax_tokens(1024);
+        request.setTemperature(0);
+        CreateCompletionResponse response = openApi.doChatGPT(request, OPENAI_API_KEY);
+        Assertions.assertNotNull(response);
     }
 }

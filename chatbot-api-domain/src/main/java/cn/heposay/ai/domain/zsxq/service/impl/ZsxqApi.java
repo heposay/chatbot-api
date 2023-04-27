@@ -1,26 +1,24 @@
 package cn.heposay.ai.domain.zsxq.service.impl;
 
-import cn.heposay.ai.domain.zsxq.domain.aggregates.UnAnsweredQuestionsAggregates;
-import cn.heposay.ai.domain.zsxq.domain.req.AnswerReq;
-import cn.heposay.ai.domain.zsxq.domain.req.ReqData;
-import cn.heposay.ai.domain.zsxq.domain.res.AnswerRes;
+import cn.heposay.ai.common.exception.BusinessException;
+import cn.heposay.ai.common.response.ErrorCode;
+import cn.heposay.ai.domain.zsxq.domain.req.AnswerRequest;
+import cn.heposay.ai.domain.zsxq.domain.req.ListTopicsRequest;
+import cn.heposay.ai.domain.zsxq.domain.res.AnswerResponse;
+import cn.heposay.ai.domain.zsxq.domain.res.ListTopicsResponse;
 import cn.heposay.ai.domain.zsxq.service.IZsxqApi;
-import com.alibaba.fastjson.JSON;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.URLUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.json.JSONUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
  * @author heposay
@@ -33,43 +31,62 @@ public class ZsxqApi implements IZsxqApi {
 
     private Logger logger = LoggerFactory.getLogger(ZsxqApi.class);
 
-    @Override
-    public UnAnsweredQuestionsAggregates queryUnAnsweredQuestionsTopicId(String groupId, String cookie) throws IOException {
-        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-        HttpGet get = new HttpGet("https://api.zsxq.com/v2/groups/" + groupId + "/topics?scope=unanswered_questions&count=20");
-        get.addHeader("cookie", cookie);
-        get.addHeader("Content-Type", "application/json;charset=UTF-8");
+    private static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/111.0";
 
-        CloseableHttpResponse response = httpClient.execute(get);
-        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-            String res = EntityUtils.toString(response.getEntity());
-            return JSON.parseObject(res, UnAnsweredQuestionsAggregates.class);
+    @Override
+    public ListTopicsResponse queryUnAnsweredQuestionsTopicId(ListTopicsRequest request, String cookie) throws BusinessException {
+        //入参校验
+        String groupId = request.getGroupId();
+        if (StringUtils.isEmpty(groupId)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "未传 groupId");
+        }
+        if (StringUtils.isEmpty(cookie)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "未传 cookie");
+        }
+        //拼接请求参数
+        String url = String.format("https://api.zsxq.com/v2/groups/%s/topics", groupId);
+        Map<String, Object> paramMap = BeanUtil.beanToMap(request);
+        String query = URLUtil.buildQuery(paramMap, StandardCharsets.UTF_8);
+        //请求接口
+        HttpResponse response = HttpRequest.get(url)
+                .header("cookie", cookie)
+                .header("user-agent", USER_AGENT)
+                .body(query)
+                .execute();
+        if (response.isOk()) {
+            String result = response.body();
+            logger.info("queryUnAnsweredQuestionsTopicId请求结果:{}", result);
+            return JSONUtil.toBean(result, ListTopicsResponse.class);
         } else {
-            throw new RuntimeException("queryUnAnsweredQuestionsTopicId Error Code is " + response.getStatusLine().getStatusCode());
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "queryUnAnsweredQuestionsTopicId请求失败,错误码是:" + response.getStatus());
         }
 
     }
 
     @Override
-    public boolean answer(String groupId, String cookie, String topicId, String text, boolean silenced) throws IOException {
-        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-        HttpPost post = new HttpPost("https://api.zsxq.com/v2/topics/" + groupId + "/answer");
-        post.addHeader("cookie", cookie);
-        post.addHeader("Content-Type", "application/json;charset=UTF-8");
-
-        AnswerReq answerReq = new AnswerReq(new ReqData(text, silenced));
-        String paramJson = JSON.toJSONString(answerReq);
-        StringEntity stringEntity = new StringEntity(paramJson,
-                ContentType.create("interfaces/json", "UTF-8"));
-        post.setEntity(stringEntity);
-        CloseableHttpResponse response = httpClient.execute(post);
-        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-            String jsonStr = EntityUtils.toString(response.getEntity());
-            logger.info("回答问题结果：groupId:{}, topicId:{}, jsonStr:{}", groupId, topicId, jsonStr);
-            AnswerRes answerRes = JSON.parseObject(jsonStr, AnswerRes.class);
-            return answerRes.isSucceeded();
+    public AnswerResponse answer(AnswerRequest request, String cookie) throws BusinessException {
+        //入参校验
+        String topicId = request.getTopicId();
+        if (StringUtils.isEmpty(topicId)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "未传 topicId");
+        }
+        if (StringUtils.isEmpty(cookie)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "未传 cookie");
+        }
+        //拼接请求参数
+        String url = String.format("https://api.zsxq.com/v2/topics/%s/answer", topicId);
+        String paramJson = JSONUtil.toJsonStr(request);
+        HttpResponse response = HttpRequest.post(url)
+                .header("cookie", cookie)
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .body(paramJson)
+                .execute();
+        if (response.isOk()) {
+            String result = response.body();
+            logger.info("answer请求结果:{}", result);
+            return JSONUtil.toBean(result, AnswerResponse.class);
         } else {
-            throw new RuntimeException("answer Error Code is " + response.getStatusLine().getStatusCode());
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "answer请求失败,错误码是:" + response.getStatus());
         }
     }
 }

@@ -1,6 +1,8 @@
 package cn.heposay.ai.domain.chatgpt.service;
 
-import cn.heposay.ai.domain.chatgpt.domain.aggregates.ChatGptAnswerAggregates;
+import cn.heposay.ai.common.exception.BusinessException;
+import cn.heposay.ai.domain.chatgpt.domain.req.CreateCompletionRequest;
+import cn.heposay.ai.domain.chatgpt.domain.res.CreateCompletionResponse;
 
 import java.io.IOException;
 
@@ -14,10 +16,10 @@ public interface IOpenApi {
     /**
      * 调用 Chatgpt 接口
      *
+     * @param request   创建补全请求
      * @param openAiKey 自行申请 https://beta.openai.com/overview
-     * @param question 问题信息
      * @return json数据
      * @throws IOException HTTP远程调用过程中如果出现异常，打印异常日志
      */
-    String doChatGPT(String openAiKey, String question) throws IOException;
+    CreateCompletionResponse doChatGPT(CreateCompletionRequest request, String openAiKey) throws BusinessException;
 }

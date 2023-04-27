@@ -1,18 +1,57 @@
 server:
   port: 8090
+  address: 0.0.0.0
+spring:
+  application:
+    name: chatbot-api
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
-#分组任务配置
+
 chatbot-api:
-  launchList: group01,group02 # 启动几组，就配置几组
-  group01:
-    groupName: ChatGPT AI 问答助手
-    groupId: 28885518425541 #知识星球ID
-    cookie: UM_distinctid=186a1b7b06611c-03507ddfe121e9-1d525635-1aeaa0-186a1b7b067740; zsxq_access_token=037C20AA-B1A1-CA8D-3BCD-230A2A9B50A9_25AFFA98B3660AC6; sensorsdata2015jssdkcross={"distinct_id":"15158212415442","first_id":"18691e9387a3cc-052d94d2fb0371-1d525635-1764000-18691e9387bdf6","props":{"$latest_traffic_source_type":"引荐流量","$latest_search_keyword":"未取到值","$latest_referrer":"https://bugstack.cn/"},"identities":"eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTg2OTFlOTM4N2EzY2MtMDUyZDk0ZDJmYjAzNzEtMWQ1MjU2MzUtMTc2NDAwMC0xODY5MWU5Mzg3YmRmNiIsIiRpZGVudGl0eV9sb2dpbl9pZCI6IjE1MTU4MjEyNDE1NDQyIn0=","history_login_id":{"name":"$identity_login_id","value":"15158212415442"},"$device_id":"18691e9387a3cc-052d94d2fb0371-1d525635-1764000-18691e9387bdf6"}; zsxqsessionid=8e56eb544ab2592f20760dcd5b29ecca; abtest_env=product # 知识星球个人cookie信息
-    openAiKey: xxx  # 自行申请 https://beta.openai.com/overview
-    cronExpression: 0/30 * * * * ? # 执行的频次配置，参考：cron.qqe2.com
-  group02:
-    groupName: Chatgpt AI小助手
-    groupId: 88885818111582 #知识星球ID
-    cookie: UM_distinctid=186a1b7b06611c-03507ddfe121e9-1d525635-1aeaa0-186a1b7b067740; zsxq_access_token=037C20AA-B1A1-CA8D-3BCD-230A2A9B50A9_25AFFA98B3660AC6; sensorsdata2015jssdkcross={"distinct_id":"15158212415442","first_id":"18691e9387a3cc-052d94d2fb0371-1d525635-1764000-18691e9387bdf6","props":{"$latest_traffic_source_type":"引荐流量","$latest_search_keyword":"未取到值","$latest_referrer":"https://bugstack.cn/"},"identities":"eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTg2OTFlOTM4N2EzY2MtMDUyZDk0ZDJmYjAzNzEtMWQ1MjU2MzUtMTc2NDAwMC0xODY5MWU5Mzg3YmRmNiIsIiRpZGVudGl0eV9sb2dpbl9pZCI6IjE1MTU4MjEyNDE1NDQyIn0=","history_login_id":{"name":"$identity_login_id","value":"15158212415442"},"$device_id":"18691e9387a3cc-052d94d2fb0371-1d525635-1764000-18691e9387bdf6"}; zsxqsessionid=8e56eb544ab2592f20760dcd5b29ecca; abtest_env=product # 知识星球个人cookie信息
-    openAiKey: xxx   # 自行申请 https://beta.openai.com/overview
-    cronExpression: 0/30 * * * * ? # 执行的频次配置，参考：cron.qqe2.com
+  #openAI配置
+  openai:
+    modol: ${OPENAI_MODEL:text-davinci-003}
+    apiKey: ${OPENAI_API_KEY:你的 OPENAI_API_KEY}
+  #知识星球配置
+  zsxq:
+    cookie: ${ZSXQ_COOKIE:你的 COOKIE}}
+    groupId: ${ZSXQ_GROUP_ID:28885518425541}
+    groupName: ${ZSXQ_GROUP_NAME:ChatGPT AI 问答助手}
+    # 是否提醒提问者
+    silenced: ${ZSXQ_SILENCED:true}
+  #任务配置
+  task:
+    #并发
+    concurrent:
+      #默认关闭（串行）
+      enable: false
+      # 并发大小（不填则等同于任务数，即全并发）
+      size: 1
+    list:
+      - name: chatbot-api #任务名
+        monitor: zsxq #监控者
+        answer: openai #回答者
+        cron: '0/30 * * * * ? ' #时间表达式
+
+
+knife4j:
+  enable: true
+  openapi:
+    title: chatbot-api开放平台api
+    description: 这里有该平台所有开放接口供大家测试
+    email: heposay@qq.com
+    concat: 林海波
+    url: https://github.com/heposay/chatbot-api.git
+    version: v4.0
+    license: Apache 2.0
+    license-url: https://stackoverflow.com/
+    terms-of-service-url: https://stackoverflow.com/
+    group:
+      dev:
+        group-name: 开发环境
+        api-rule: package
+        api-rule-resources:
+          - cn.heposay.ai.controller
+

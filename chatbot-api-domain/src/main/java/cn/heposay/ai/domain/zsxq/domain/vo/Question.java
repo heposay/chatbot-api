@@ -1,10 +1,14 @@
 package cn.heposay.ai.domain.zsxq.domain.vo;
+
+import lombok.Data;
+
 /**
  * @author heposay
  * @description 知识星球问题信息
  * @github <a href="http://github.com/heposay"> heposay的Github仓库 </a>
  * @time Created in 2023/4/25 15:08
  */
+@Data
 public class Question {
 
     private Owner owner;
@@ -20,48 +24,5 @@ public class Question {
     private OwnerDetail owner_detail;
 
     private String owner_location;
-
-    public void setOwner(Owner owner){
-        this.owner = owner;
-    }
-    public Owner getOwner(){
-        return this.owner;
-    }
-    public void setQuestionee(Questionee questionee){
-        this.questionee = questionee;
-    }
-    public Questionee getQuestionee(){
-        return this.questionee;
-    }
-    public void setText(String text){
-        this.text = text;
-    }
-    public String getText(){
-        return this.text;
-    }
-    public void setExpired(boolean expired){
-        this.expired = expired;
-    }
-    public boolean getExpired(){
-        return this.expired;
-    }
-    public void setAnonymous(boolean anonymous){
-        this.anonymous = anonymous;
-    }
-    public boolean getAnonymous(){
-        return this.anonymous;
-    }
-    public void setOwner_detail(OwnerDetail owner_detail){
-        this.owner_detail = owner_detail;
-    }
-    public OwnerDetail getOwner_detail(){
-        return this.owner_detail;
-    }
-    public void setOwner_location(String owner_location){
-        this.owner_location = owner_location;
-    }
-    public String getOwner_location(){
-        return this.owner_location;
-    }
 
 }

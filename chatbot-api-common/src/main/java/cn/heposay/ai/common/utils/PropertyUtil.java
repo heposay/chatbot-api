@@ -1,4 +1,4 @@
-package cn.heposay.ai.common;
+package cn.heposay.ai.common.utils;
 
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;

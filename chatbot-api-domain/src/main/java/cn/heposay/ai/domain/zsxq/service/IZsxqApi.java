@@ -1,6 +1,10 @@
 package cn.heposay.ai.domain.zsxq.service;
 
-import cn.heposay.ai.domain.zsxq.domain.aggregates.UnAnsweredQuestionsAggregates;
+import cn.heposay.ai.common.exception.BusinessException;
+import cn.heposay.ai.domain.zsxq.domain.req.AnswerRequest;
+import cn.heposay.ai.domain.zsxq.domain.req.ListTopicsRequest;
+import cn.heposay.ai.domain.zsxq.domain.res.AnswerResponse;
+import cn.heposay.ai.domain.zsxq.domain.res.ListTopicsResponse;
 
 import java.io.IOException;
 
@@ -14,23 +18,20 @@ public interface IZsxqApi {
     /**
      * 查询知识星球未回答的问题集合接口
      *
-     * @param groupId 组ID
+     * @param request 获取列表请求
      * @param cookie  用户Cookie
      * @return 未回答的 TopicID 列表
      * @throws IOException 如果请求过程出现异常，打印日志
      */
-    UnAnsweredQuestionsAggregates queryUnAnsweredQuestionsTopicId(String groupId, String cookie) throws IOException;
+    ListTopicsResponse queryUnAnsweredQuestionsTopicId(ListTopicsRequest request, String cookie) throws BusinessException;
 
     /**
      * 回答问题接口
      *
-     * @param groupId  组ID
-     * @param cookie   用户Cookie
-     * @param topicId  问题的ID
-     * @param text     回答的文本
-     * @param silenced 是否全体可见 true：全体可见  false:提问者可见
+     * @param request 回答问题请求
+     * @param cookie  用户Cookie
      * @return 是否回答成功， true：回答成功  false：回答失败
      * @throws IOException 如果请求过程出现异常，打印日志
      */
-    boolean answer(String groupId, String cookie, String topicId, String text, boolean silenced) throws IOException;
+    AnswerResponse answer(AnswerRequest request,String cookie) throws BusinessException;
 }
